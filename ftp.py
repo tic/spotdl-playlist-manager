@@ -3,7 +3,16 @@ from os import listdir as os_listdir, remove as os_remove
 from os.path import isfile as os_isfile
 from config import ftp
 
-def transfer_tracks(playlist_id):
+def set_cwd(ftp_client: ftplib.FTP, target_dir: str):
+  if target_dir != '':
+    try:
+      ftp_client.cwd(target_dir)
+    except ftplib.error_perm:
+      set_cwd(ftp_client, '/'.join(target_dir.split('/')[:-1]))
+      ftp_client.mkd(target_dir)
+      ftp_client.cwd(target_dir)
+
+def transfer_tracks(playlist_id: str):
   base_dir = f'downloads/{playlist_id}'
   ftp_destination = ftp['path'] + f'/{playlist_id}/'
   transfer_count = 0
@@ -14,7 +23,7 @@ def transfer_tracks(playlist_id):
       print(f'[FTP] transferring file "{file}"')
       with open(filename, 'rb') as fp:
         with ftplib.FTP(host=ftp['host'], user=ftp['user'], passwd=ftp['pwd']) as ftp_client:
-          ftp_client.cwd(ftp_destination)
+          set_cwd(ftp_client, ftp_destination)
           ftp_client.storbinary(f'STOR {file}', fp)
 
       os_remove(filename)

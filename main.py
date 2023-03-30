@@ -8,8 +8,9 @@ def event_loop():
   print(f'[EL] starting event loop')
   for playlist_id in playlist_ids:
     update_count = check_for_new_items(playlist_id)
+    transfer_tracks(playlist_id)
     if update_count > 0:
-      transfer_tracks(playlist_id)
+      print(f'[EL] {playlist_id} --> discovered {update_count} new item(s)')
 
 def main():
   try:
